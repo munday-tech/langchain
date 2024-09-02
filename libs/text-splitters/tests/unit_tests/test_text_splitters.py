@@ -2162,7 +2162,7 @@ def test_html_splitter_with_preserved_elements() -> None:
 
     expected = [
         Document(
-            page_content="Row 1 Row 2  Item 1 Item 2 ",
+            page_content="Row 1 Row 2 Item 1 Item 2",
             metadata={"Header 1": "Section 1"},
         ),
     ]
@@ -2218,6 +2218,7 @@ def test_html_splitter_with_small_chunk_size() -> None:
 
     assert documents == expected  # Should split into multiple chunks
 
+
 @pytest.mark.requires("bs4")
 def test_html_splitter_with_denylist_tags() -> None:
     """Test HTML splitting with denylist tag filtering."""
@@ -2242,6 +2243,7 @@ def test_html_splitter_with_denylist_tags() -> None:
 
     assert documents == expected
 
+
 @pytest.mark.requires("bs4")
 def test_html_splitter_with_external_metadata() -> None:
     """Test HTML splitting with external metadata integration."""
@@ -2265,6 +2267,7 @@ def test_html_splitter_with_external_metadata() -> None:
 
     assert documents == expected
 
+
 @pytest.mark.requires("bs4")
 def test_html_splitter_with_text_normalization() -> None:
     """Test HTML splitting with text normalization."""
@@ -2287,6 +2290,7 @@ def test_html_splitter_with_text_normalization() -> None:
     ]
 
     assert documents == expected
+
 
 @pytest.mark.requires("bs4")
 @pytest.mark.requires("nltk")
@@ -2313,6 +2317,7 @@ def test_html_splitter_with_stopword_removal() -> None:
 
     assert documents == expected
 
+
 @pytest.mark.requires("bs4")
 def test_html_splitter_with_allowlist_tags() -> None:
     """Test HTML splitting with allowlist tag filtering."""
@@ -2337,6 +2342,7 @@ def test_html_splitter_with_allowlist_tags() -> None:
     ]
 
     assert documents == expected
+
 
 @pytest.mark.requires("bs4")
 def test_html_splitter_with_mixed_preserve_and_filter() -> None:
@@ -2365,12 +2371,13 @@ def test_html_splitter_with_mixed_preserve_and_filter() -> None:
     expected = [
         Document(
             page_content="Keep this table Cell contents kept, span removed"
-              "  This paragraph should be kept.",
+            " This paragraph should be kept.",
             metadata={"Header 1": "Section 1"},
         ),
     ]
 
     assert documents == expected
+
 
 @pytest.mark.requires("bs4")
 def test_html_splitter_with_no_headers() -> None:
@@ -2394,6 +2401,7 @@ def test_html_splitter_with_no_headers() -> None:
     ]
 
     assert documents == expected
+
 
 @pytest.mark.requires("bs4")
 def test_html_splitter_with_media_preservation() -> None:
@@ -2419,11 +2427,11 @@ def test_html_splitter_with_media_preservation() -> None:
     expected = [
         Document(
             page_content="This is an image: ![image:http://example.com/image.png]"
-                        "(http://example.com/image.png) "
-                        "This is a video: ![video:http://example.com/video.mp4]"
-                        "(http://example.com/video.mp4) "
-                        "This is audio: ![audio:http://example.com/audio.mp3]"
-                        "(http://example.com/audio.mp3)",
+            "(http://example.com/image.png) "
+            "This is a video: ![video:http://example.com/video.mp4]"
+            "(http://example.com/video.mp4) "
+            "This is audio: ![audio:http://example.com/audio.mp3]"
+            "(http://example.com/audio.mp3)",
             metadata={"Header 1": "Section 1"},
         ),
     ]

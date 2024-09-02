@@ -432,12 +432,15 @@ class HTMLSemanticPreservingSplitter:
         self._allowlist_tags = allowlist_tags
         if allowlist_tags:
             self._allowlist_tags = list(
-                    set(allowlist_tags + [header[0] for header in headers_to_split_on])
-                )
+                set(allowlist_tags + [header[0] for header in headers_to_split_on])
+            )
         self._denylist_tags = denylist_tags
         if denylist_tags:
-            self._denylist_tags = [tag for tag in denylist_tags if tag not in 
-                                   [header[0] for header in headers_to_split_on]]
+            self._denylist_tags = [
+                tag
+                for tag in denylist_tags
+                if tag not in [header[0] for header in headers_to_split_on]
+            ]
         if separators:
             self._recursive_splitter = RecursiveCharacterTextSplitter(
                 separators=separators,
@@ -451,8 +454,8 @@ class HTMLSemanticPreservingSplitter:
 
         if self._stopword_removal:
             try:
-                import nltk
-                from nltk.corpus import stopwords
+                import nltk  # type: ignore
+                from nltk.corpus import stopwords  # type: ignore
 
                 nltk.download("stopwords")
                 self._stopwords = set(stopwords.words(self._stopword_lang))
@@ -480,13 +483,12 @@ class HTMLSemanticPreservingSplitter:
 
         if self._allowlist_tags or self._denylist_tags:
             self._filter_tags(soup)
-        
 
         return self._process_html(soup)
 
     def _process_media(self, soup: Any) -> None:
         """
-        Processes the media elements in the HTML content by wrapping them in a 
+        Processes the media elements in the HTML content by wrapping them in a
         <media-wrapper> tag.
 
         Args:
@@ -569,7 +571,7 @@ class HTMLSemanticPreservingSplitter:
             )
 
         return text
-    
+
     def _process_html(self, soup: Any) -> List[Document]:
         """
         Processes the HTML content using BeautifulSoup and splits it
@@ -588,11 +590,29 @@ class HTMLSemanticPreservingSplitter:
         placeholder_count: int = 0
 
         def _get_element_text(element: Any) -> str:
-            if self._custom_handlers:
-                handler = self._custom_handlers.get(element.name)
-                if handler:
-                    return handler(element)
-            text = element.get_text(separator=" ", strip=True) + " "
+            """
+            Recursively extracts and processes the text of an element,
+            applying custom handlers where applicable, and ensures correct spacing.
+
+            Args:
+                element (Any): The HTML element to process.
+
+            Returns:
+                str: The processed text of the element.
+            """
+            if element.name in self._custom_handlers:
+                return self._custom_handlers[element.name](element)
+
+            text = ""
+
+            if element.name is not None:
+                for child in element.children:
+                    child_text = _get_element_text(child).strip()
+                    if text and child_text:
+                        text += " "
+                    text += child_text
+            elif element.string:
+                text += element.string
 
             return self._normalize_and_clean_text(text)
 
@@ -705,7 +725,7 @@ class HTMLSemanticPreservingSplitter:
         if len(content) <= self._max_chunk_size:
             page_content = self._reinsert_preserved_elements(
                 content, preserved_elements
-            )      
+            )
             return [Document(page_content=page_content, metadata=metadata)]
         else:
             return self._further_split_chunk(content, metadata, preserved_elements)
@@ -756,5 +776,5 @@ class HTMLSemanticPreservingSplitter:
             str: The content with placeholders replaced by preserved elements.
         """
         for placeholder, preserved_content in preserved_elements.items():
-            content = content.replace(placeholder, preserved_content)
+            content = content.replace(placeholder, preserved_content.strip())
         return content
