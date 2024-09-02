@@ -325,18 +325,19 @@ class HTMLSectionSplitter:
 class HTMLSemanticPreservingSplitter:
     """
     Splits HTML content by headers into generalized chunks, preserving semantic
-    structure. If chunks exceed the maximum chunk size,
-    uses RecursiveCharacterTextSplitter for further splitting.
+    structure. If chunks exceed the maximum chunk size, it uses
+    RecursiveCharacterTextSplitter for further splitting.
 
-    The splitter preserves full HTML elements (e.g., <table>, <ul>) and converts links,
-    to Markdown-like links.
-    Note that some chunks may exceed the maximum size to maintain semantic integrity.
+    The splitter preserves full HTML elements (e.g., <table>, <ul>) and converts
+    links to Markdown-like links. It can also preserve images, videos, and audio
+    elements by converting them into Markdown format. Note that some chunks may
+    exceed the maximum size to maintain semantic integrity.
 
     Attributes:
         headers_to_split_on (List[Tuple[str, str]]): HTML headers (e.g., "h1", "h2")
         that define content sections.
-        max_chunk_size (int): Maximum size for each chunk, with allowance for exceeding
-        this limit to preserve semantics.
+        max_chunk_size (int): Maximum size for each chunk, with allowance for
+        exceeding this limit to preserve semantics.
         chunk_overlap (int): Number of characters to overlap between chunks to ensure
         contextual continuity.
         separators (List[str]): Delimiters used by RecursiveCharacterTextSplitter for
@@ -344,8 +345,22 @@ class HTMLSemanticPreservingSplitter:
         elements_to_preserve (List[str]): HTML tags (e.g., <table>, <ul>) to remain
         intact during splitting.
         preserve_links (bool): Converts <a> tags to Markdown links ([text](url)).
+        preserve_images (bool): Converts <img> tags to Markdown images (![alt](src)).
+        preserve_videos (bool): Converts <video> tags to Markdown
+        video links (![video](src)).
+        preserve_audio (bool): Converts <audio> tags to Markdown
+        audio links (![audio](src)).
         custom_handlers (Dict[str, Callable[[Any], str]]): Optional custom handlers for
         specific HTML tags, allowing tailored extraction or processing.
+        stopword_removal (bool): Optionally remove stopwords from the text.
+        stopword_lang (str): The language of stopwords to remove.
+        normalize_text (bool): Optionally normalize text
+        (e.g., lowercasing, removing punctuation).
+        external_metadata (Optional[Dict[str, str]]): Additional metadata to attach to
+        the Document objects.
+        allowlist_tags (Optional[List[str]]): Only these tags will be retained in
+        the HTML.
+        denylist_tags (Optional[List[str]]): These tags will be removed from the HTML.
 
     Example:
 
@@ -367,6 +382,7 @@ class HTMLSemanticPreservingSplitter:
             headers_to_split_on=[("h1", "Header 1"), ("h2", "Header 2")],
             max_chunk_size=500,
             preserve_links=True,
+            preserve_images=True,
             custom_handlers={"iframe": custom_iframe_extractor}
         )
     """
@@ -402,9 +418,21 @@ class HTMLSemanticPreservingSplitter:
             separators (Optional[List[str]]): Delimiters RecursiveCharacterTextSplitter.
             elements_to_preserve (List[str]): HTML tags to preserve during splitting.
             preserve_links (bool): Converts links to Markdown format.
+            preserve_images (bool): Converts images to Markdown format.
+            preserve_videos (bool): Converts videos to Markdown format.
+            preserve_audio (bool): Converts audio elements to Markdown format.
             custom_handlers (Optional[Dict[str, Callable[[Any], str]]]): Handlers for
                 custom processing of specific HTML tags,
                 where the key is the tag name and the value is the processing function.
+            stopword_removal (bool): Optionally remove stopwords from the text.
+            stopword_lang (str): The language of stopwords to remove.
+            normalize_text (bool): Optionally normalize text (e.g., lowercasing).
+            external_metadata (Optional[Dict[str, str]]): Additional metadata to add to
+            the documents.
+            allowlist_tags (Optional[List[str]]): Only these tags will be retained in
+            the HTML.
+            denylist_tags (Optional[List[str]]): These tags will be removed from
+            the HTML.
         """
         try:
             from bs4 import BeautifulSoup, Tag
@@ -489,7 +517,7 @@ class HTMLSemanticPreservingSplitter:
     def _process_media(self, soup: Any) -> None:
         """
         Processes the media elements in the HTML content by wrapping them in a
-        <media-wrapper> tag.
+        <media-wrapper> tag and converting them to Markdown format.
 
         Args:
             soup (Any): Parsed HTML content using BeautifulSoup.

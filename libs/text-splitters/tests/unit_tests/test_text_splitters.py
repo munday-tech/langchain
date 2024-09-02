@@ -2405,7 +2405,8 @@ def test_html_splitter_with_no_headers() -> None:
 
 @pytest.mark.requires("bs4")
 def test_html_splitter_with_media_preservation() -> None:
-    """Test HTML splitting with media elements preserved and converted to Markdown-like links."""
+    """Test HTML splitting with media elements preserved and converted to Markdown-like
+    links."""
     html_content = """
     <h1>Section 1</h1>
     <p>This is an image:</p>
